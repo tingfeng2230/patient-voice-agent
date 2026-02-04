@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电脑端表单显示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .connection-panel {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .connection-panel .title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .connection-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .connection-form input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .connection-form input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .connection-form input:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .connection-form button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-connect {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-connect:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-disconnect {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-disconnect:hover {
+            background: #e0e0e0;
+        }
+
+        .connection-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .connection-status .info {
+            flex: 1;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .connection-status .info strong {
+            color: #333;
+        }
+
+        .connection-status .indicator-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .connection-status .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            transition: all 0.3s;
+        }
+
+        .connection-status .indicator.connected {
+            background: #2ecc71;
+            box-shadow: 0 0 10px #2ecc71;
+        }
+
+        .connection-status .indicator.disconnected {
+            background: #e74c3c;
+        }
+
+        .connection-status .indicator.connecting {
+            background: #f39c12;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .form-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+
+        .form-section.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .form-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .form-group .field-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-clear {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .sync-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+        }
+
+        .sync-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sync-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .success {
+            color: #2ecc71;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: #e0f7e0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💻 电脑端表单显示</h1>
+        <p class="subtitle">实时接收手机端语音录入并显示表单</p>
+        
+        <div class="connection-panel">
+            <div class="title">🔗 连接手机端</div>
+            <div class="connection-form">
+                <input 
+                    type="text" 
+                    id="sessionInput" 
+                    placeholder="输入6位会话码" 
+                    maxlength="6"
+                    autocomplete="off"
+                >
+                <button class="btn-connect" id="connectBtn">连接</button>
+                <button class="btn-disconnect" id="disconnectBtn" style="display: none;">断开</button>
+            </div>
+            <div class="connection-status">
+                <div class="info">
+                    <span id="connectionInfo">请输入手机端显示的会话码</span>
+                </div>
+                <div class="indicator-wrapper">
+                    <div class="indicator" id="connectionIndicator"></div>
+                    <span id="connectionText">未连接</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section" id="formSection">
+            <h2>📋 就诊患者信息表单</h2>
+            
+            <div class="form-group">
+                <label for="patientName">患者姓名</label>
+                <input 
+                    type="text" 
+                    id="patientName" 
+                    placeholder="等待手机端录入..."
+                    autocomplete="off"
+                >
+                <div class="field-hint">💡 手机端说出"我是xxx"或"我叫xxx"即可自动识别</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="medicalRecord">问诊记录</label>
+                <textarea 
+                    id="medicalRecord" 
+                    placeholder="等待手机端录入..."
+                ></textarea>
+                <div class="field-hint">💡 手机端语音内容会实时同步到此处</div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-clear" id="clearBtn">清空表单</button>
+                <button class="btn btn-submit" id="submitBtn">保存表单</button>
+            </div>
+            
+            <div class="success" id="successMsg">✅ 表单保存成功！</div>
+        </div>
+    </div>
+
+    <div class="sync-indicator" id="syncIndicator">
+        <div class="dot"></div>
+        <span>实时同步中</span>
+    </div>
+
+    <script>
+        let ws = null;
+        let sessionId = null;
+        let reconnectTimer = null;
+
+        const sessionInput = document.getElementById('sessionInput');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const connectionIndicator = document.getElementById('connectionIndicator');
+        const connectionText = document.getElementById('connectionText');
+        const connectionInfo = document.getElementById('connectionInfo');
+        const formSection = document.getElementById('formSection');
+        const patientNameInput = document.getElementById('patientName');
+        const medicalRecordInput = document.getElementById('medicalRecord');
+        const clearBtn = document.getElementById('clearBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMsg = document.getElementById('successMsg');
+        const syncIndicator = document.getElementById('syncIndicator');
+
+        // 连接 WebSocket
+        function connect() {
+            sessionId = sessionInput.value.trim().toUpperCase();
+            
+            if (!sessionId || sessionId.length !== 6) {
+                alert('请输入6位会话码');
+                return;
+            }
+
+            setConnectionStatus('connecting');
+            connectBtn.disabled = true;
+            sessionInput.disabled = true;
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            ws = new WebSocket(`${protocol}//${host}/ws/${sessionId}`);
+
+            ws.onopen = () => {
+                setConnectionStatus('connected');
+                connectionInfo.innerHTML = `已连接到会话：<strong>${sessionId}</strong>`;
+                disconnectBtn.style.display = 'block';
+                connectBtn.style.display = 'none';
+                formSection.classList.add('active');
+            };
+
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                console.log('收到消息:', message);
+
+                if (message.type === 'init' || message.type === 'update') {
+                    updateForm(message.data);
+                    showSyncIndicator();
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                setConnectionStatus('disconnected');
+            };
+
+            ws.onclose = () => {
+                setConnectionStatus('disconnected');
+                disconnectBtn.style.display = 'none';
+                connectBtn.style.display = 'block';
+                connectBtn.disabled = false;
+                sessionInput.disabled = false;
+                formSection.classList.remove('active');
+                
+                // 显示重连提示
+                connectionInfo.textContent = '连接已断开，可重新连接';
+            };
+        }
+
+        // 断开连接
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            sessionId = null;
+            setConnectionStatus('disconnected');
+            connectionInfo.textContent = '请输入手机端显示的会话码';
+            sessionInput.value = '';
+            sessionInput.disabled = false;
+            connectBtn.disabled = false;
+            connectBtn.style.display = 'block';
+            disconnectBtn.style.display = 'none';
+            formSection.classList.remove('active');
+        }
+
+        // 设置连接状态
+        function setConnectionStatus(status) {
+            connectionIndicator.className = 'indicator ' + status;
+            
+            switch (status) {
+                case 'connected':
+                    connectionText.textContent = '已连接';
+                    connectionText.style.color = '#2ecc71';
+                    break;
+                case 'connecting':
+                    connectionText.textContent = '连接中...';
+                    connectionText.style.color = '#f39c12';
+                    break;
+                case 'disconnected':
+                    connectionText.textContent = '未连接';
+                    connectionText.style.color = '#e74c3c';
+                    break;
+            }
+        }
+
+        // 更新表单内容
+        function updateForm(data) {
+            if (data.patient_name !== undefined) {
+                patientNameInput.value = data.patient_name;
+            }
+            if (data.medical_record !== undefined) {
+                medicalRecordInput.value = data.medical_record;
+            }
+        }
+
+        // 显示同步指示器
+        function showSyncIndicator() {
+            syncIndicator.classList.add('show');
+            setTimeout(() => {
+                syncIndicator.classList.remove('show');
+            }, 2000);
+        }
+
+        // 清空表单
+        function clearForm() {
+            patientNameInput.value = '';
+            medicalRecordInput.value = '';
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'update',
+                    data: {
+                        patient_name: '',
+                        medical_record: ''
+                    }
+                }));
+            }
+        }
+
+        // 提交表单
+        function submitForm() {
+            const name = patientNameInput.value.trim();
+            const record = medicalRecordInput.value.trim();
+
+            if (!name && !record) {
+                alert('请先填写表单内容');
+                return;
+            }
+
+            // 模拟提交（实际项目中需要发送到后端）
+            console.log('提交表单:', {
+                sessionId: sessionId,
+                name: name || '未填写',
+                medicalRecord: record || '未填写'
+            });
+
+            // 显示成功消息
+            successMsg.textContent = `✅ 表单保存成功！\n患者：${name || '未填写'}\n会话：${sessionId}`;
+            successMsg.classList.add('show');
+
+            // 3秒后隐藏成功消息
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // 事件监听
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        clearBtn.addEventListener('click', clearForm);
+        submitBtn.addEventListener('click', submitForm);
+
+        // 回车连接
+        sessionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                connect();
+            }
+        });
+
+        // 自动将输入转换为大写
+        sessionInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // 表单内容变化时同步
+        patientNameInput.addEventListener('input', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'update',
+                    data: {
+                        patient_name: patientNameInput.value,
+                        medical_record: medicalRecordInput.value
+                    }
+                }));
+            }
+        });
+
+        medicalRecordInput.addEventListener('input', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'update',
+                    data: {
+                        patient_name: patientNameInput.value,
+                        medical_record: medicalRecordInput.value
+                    }
+                }));
+            }
+        });
+    </script>
+</body>
+</html>
